@@ -4,6 +4,9 @@ from src.pdf_loader import PDFProcessor
 from src.vector_store import PineconeManager
 from src.rag_engine import GeminiRAGEngine
 
+MAX_FILE_SIZE_MB = 10
+MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024
+
 st.set_page_config(page_title="PDF RAG & Summarizer", page_icon="📚", layout="wide")
 
 @st.cache_resource
@@ -38,18 +41,23 @@ with st.sidebar:
     uploaded_file = st.file_uploader("เลือกไฟล์ PDF", type=["pdf"])
     
     if uploaded_file and st.button("ประมวลผล PDF"):
-        with st.spinner("กำลังอ่านไฟล์และบันทึกลง Pinecone..."):
-            # 1. Read & Chunk
-            chunks, full_text = pdf_processor.process_pdf(uploaded_file)
-            st.session_state["full_text"] = full_text
-            
-            # 2. Get Embeddings & Upsert
-            texts_to_embed = [c["text"] for c in chunks]
-            embeddings = rag_engine.get_embeddings(texts_to_embed)
-            vector_store.upsert_vectors(chunks, embeddings)
-            
-            st.session_state["pdf_processed"] = True
-            st.success(f"บันทึกข้อมูล {len(chunks)} Chunks เรียบร้อยแล้ว!")
+        if uploaded_file.size > MAX_FILE_SIZE_BYTES:
+            st.error(f"❌ ขนาดไฟล์ใหญ่เกินไป! กรุณาอัปโหลดไฟล์ขนาดไม่เกิน {MAX_FILE_SIZE_MB} MB (ไฟล์ของคุณขนาด {uploaded_file.size / (1024*1024):.2f} MB)")
+        else:
+            st.success("✅ อัปโหลดไฟล์สำเร็จ!")
+        
+            with st.spinner("กำลังอ่านไฟล์และบันทึกลง Pinecone..."):
+                # 1. Read & Chunk
+                chunks, full_text = pdf_processor.process_pdf(uploaded_file)
+                st.session_state["full_text"] = full_text
+                
+                # 2. Get Embeddings & Upsert
+                texts_to_embed = [c["text"] for c in chunks]
+                embeddings = rag_engine.get_embeddings(texts_to_embed)
+                vector_store.upsert_vectors(chunks, embeddings)
+                
+                st.session_state["pdf_processed"] = True
+                st.success(f"บันทึกข้อมูล {len(chunks)} Chunks เรียบร้อยแล้ว!")
 
 # Main Tabs
 tab1, tab2 = st.tabs(["💬 ถาม-ตอบ (RAG)", "📝 สรุปเอกสาร (Summary)"])
@@ -82,19 +90,12 @@ with tab1:
                 answer = rag_engine.answer_question(prompt, matching_chunks)
                 st.markdown(answer)
                 
-                # Expandable Source View
-                with st.expander("ดูแหล่งที่มาของข้อมูล (Context)"):
-                    for c in matching_chunks:
-                        st.caption(f"**หน้า {c['page']}** (Score: {c['score']:.2f})")
-                        st.write(c["text"])
-                        st.divider()
 
         st.session_state.messages.append({"role": "assistant", "content": answer})
 
 # Tab 2: Summarization
 with tab2:
-    if st.button("สรุปเนื้อหา PDF ทั้งหมด"):
-        # 🟢 เช็คว่า full_text ไม่เป็น None และไม่เป็น String ว่าง
+    if st.button("สรุปเนื้อหา PDF ทั้งหมด ใช้กับเอกสารที่เพิ่ง Upload เสร็จสิ้นเท่านั้น"):
         full_text = st.session_state.get("full_text")
         if full_text:
             with st.spinner("Gemini กำลังอ่านและสรุปเนื้อหา..."):

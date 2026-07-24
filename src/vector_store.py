@@ -46,7 +46,8 @@ class PineconeManager:
         results = self.index.query(
             vector=query_embedding,
             top_k=top_k,
-            include_metadata=True
+            include_metadata=True,
+            namespace=self.namespace
         )
         matches = []
         for match in getattr(results, "matches", []):

@@ -59,14 +59,15 @@ class GeminiRAGEngine:
     # ตอบคำถามอิงตาม Context จาก Pinecone
     def answer_question(self, query:str, context_chunks: list[dict]) -> str:
         context_str = "\n\n".join([f"[หน้าที่ {c['page']}]: {c['text']}"  for c in context_chunks ])
-        prompt = f"""คุณเป็นผู้ช่วยตอบคำถามอิงจากเอกสารที่กำหนดให้เท่านั้น 
-กรุณาตอบคำถามโดยใช้ข้อมูลจาก Context ด้านล่างนี้ หากไม่มีข้อมูลใน Context ให้ระบุว่า "ไม่พบข้อมูลดังกล่าวในเอกสาร" อย่างสุภาพ
+        prompt = f"""
+        คุณเป็นผู้ช่วยตอบคำถามอิงจากเอกสารที่กำหนดให้เท่านั้น กรุณาตอบคำถามโดยใช้ข้อมูลจาก Context ด้านล่างนี้ หากไม่มีข้อมูลใน Context ให้ระบุว่า "ไม่พบข้อมูลดังกล่าวในเอกสาร" อย่างสุภาพ
 
 Context:
 {context_str}
 
 คำถาม: {query}
-คำตอบ (โปรดอ้างอิงเลขหน้าหากเป็นไปได้):"""
+คำตอบ (โปรดอ้างอิงเลขหน้าหากเป็นไปได้):
+"""
 
         response = self.client.models.generate_content(
             model=self.llm_model,
