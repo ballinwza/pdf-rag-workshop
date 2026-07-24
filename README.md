@@ -6,6 +6,10 @@
 
 A PDF document search, summarization, and Q&A application using Retrieval-Augmented Generation (RAG), powered by Google Gemini API, Pinecone Vector Database, and Streamlit.
 
+## Preview
+Deployed on Render it's severless must waiting around 3min after open web site.
+
+* (Web Demo)[https://pdf-rag-workshop.onrender.com/]
 
 ## 🌟 Key Features
 * 📄 PDF Processing & Chunking: Parses PDF files and chunks content into smaller segments, automatically capturing page number metadata.

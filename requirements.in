@@ -10,10 +10,11 @@ pytest
 
 google-genai
 langchain-text-splitters
-langchain-pinecone
-pinecone-client
+# langchain-pinecone
+# pinecone-client
 python-dotenv
 pyreadline3
+pinecone
 
 # presidio-analyzer 
 # presidio-anonymizer
