@@ -1,0 +1,16 @@
+# fastapi[standard]
+# uvicorn
+# pydantic
+
+streamlit
+pypdf
+pytest
+
+google-genai
+langchain-text-splitters
+langchain-pinecone
+pinecone-client
+python-dotenv
+
+# presidio-analyzer 
+# presidio-anonymizer
