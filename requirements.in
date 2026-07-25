@@ -1,8 +1,6 @@
-# fastapi[standard]
-# uvicorn
-# dotenv
-# google-genai
-# pydantic
+fastapi[standard]
+uvicorn
+pydantic
 
 streamlit
 pypdf
@@ -10,8 +8,6 @@ pytest
 
 google-genai
 langchain-text-splitters
-# langchain-pinecone
-# pinecone-client
 python-dotenv
 pyreadline3
 pinecone

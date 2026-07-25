@@ -6,3 +6,6 @@ init:
 
 before-init:
 	pip install pip-tools
+
+run-api:
+	uvicorn main:app --reload

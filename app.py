@@ -1,8 +1,8 @@
 import streamlit as st
 from src.config import Config
-from src.pdf_loader import PDFProcessor
-from src.vector_store import PineconeManager
-from src.rag_engine import GeminiRAGEngine
+from src.api.services.pdf_loader import PDFProcessorService
+from src.api.services.pinecone_store import PineconeManagerService
+from src.api.services.gemini_rag_engine import GeminiRAGEngineService
 
 MAX_FILE_SIZE_MB = 10
 MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024
@@ -11,19 +11,19 @@ st.set_page_config(page_title="PDF RAG & Summarizer", page_icon="📚", layout="
 
 @st.cache_resource
 def init_services():
-    rag_engine = GeminiRAGEngine(
+    rag_engine = GeminiRAGEngineService(
         api_key=Config.GEMINI_API_KEY,
         embedding_model=Config.EMBEDDING_MODEL,
         llm_model=Config.LLM_MODEL,
         dimension=Config.PINECONE_DIMENSION
     )
-    vector_store = PineconeManager(
+    vector_store = PineconeManagerService(
         api_key=Config.PINECONE_API_KEY,
         index_name=Config.PINECONE_INDEX_NAME,
         dimension=Config.PINECONE_DIMENSION,
         namespace=Config.PINECONE_NAMESPACE
     )
-    pdf_processor = PDFProcessor()
+    pdf_processor = PDFProcessorService()
     return rag_engine, vector_store, pdf_processor
 
 try:

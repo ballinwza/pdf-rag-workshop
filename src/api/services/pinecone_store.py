@@ -1,6 +1,8 @@
 from pinecone import Pinecone, ServerlessSpec
 import uuid
+import logging
 
+logger = logging.getLogger(__name__)
 class PineconeManagerService:
     def __init__(self, api_key: str, index_name: str, dimension: int =768, namespace: str="__default__"):
         self.pc = Pinecone(api_key=api_key)
@@ -20,6 +22,11 @@ class PineconeManagerService:
                 metric="cosine",
                 spec=ServerlessSpec(cloud="aws", region="us-east-1")
             )
+            
+    def check_connection(self):
+        index = self.pc.Index(self.index_name)
+        index.describe_index_stats()
+
     
     # นำ Vector และ Metadata ขึ้น Pinecone
     def upsert_vectors(self, chunks: list[dict], embeddings: list[list[float]]):
@@ -57,4 +64,8 @@ class PineconeManagerService:
                 "score":match.score
             })
         return matches
+    
+    def delete_namespace(self, namespace: str):
+        self.index.delete(delete_all=True, namespace=namespace)
+        logger.info(f"Successfully deleated all vectors in namespace: {namespace}")
     
