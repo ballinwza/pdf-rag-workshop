@@ -1,8 +1,8 @@
 import pytest
-from src.sanitizer import DataSanitizer
+from src.api.services.sanitizer import DataSanitizerService
 
 def test_regex_redaction():
-    sanitizer = DataSanitizer()
+    sanitizer = DataSanitizerService()
     text = "เลขบัตรประชาชนคือ 1100200300401 และเบอร์โทร 081-234-5678"
     result = sanitizer.sanitize(text)
     
@@ -14,7 +14,7 @@ def test_regex_redaction():
     assert "[REDACTED_PHONE]" in result
 
 def test_keyword_blacklist():
-    sanitizer = DataSanitizer(custom_keywords=["Project Manhattan", "SecretCorp"])
+    sanitizer = DataSanitizerService(custom_keywords=["Project Manhattan", "SecretCorp"])
     text = "เอกสารลับของ Project Manhattan โดยบริษัท SecretCorp"
     result = sanitizer.sanitize(text)
     
