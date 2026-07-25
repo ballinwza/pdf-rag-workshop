@@ -1,7 +1,7 @@
 from pinecone import Pinecone, ServerlessSpec
 import uuid
 
-class PineconeManager:
+class PineconeManagerService:
     def __init__(self, api_key: str, index_name: str, dimension: int =768, namespace: str="__default__"):
         self.pc = Pinecone(api_key=api_key)
         self.index_name = index_name

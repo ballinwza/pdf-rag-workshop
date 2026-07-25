@@ -1,7 +1,7 @@
 from google import genai
 from google.genai import types
 
-class GeminiRAGEngine:
+class GeminiRAGEngineService:
     def __init__(self, api_key: str, embedding_model: str, llm_model: str, dimension:int=768):
         # 🟢 ต้องส่ง api_key เป็น string เข้า genai.Client
         self.client = genai.Client(api_key=api_key)

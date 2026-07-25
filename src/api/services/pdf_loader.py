@@ -1,9 +1,9 @@
 from pypdf import PdfReader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
-from src.sanitizer import DataSanitizer
+from src.api.services.sanitizer import DataSanitizerService
 from src.config import Config
 
-class PDFProcessor:
+class PDFProcessorService:
     def __init__(self, chunk_size: int = 1000, chunk_overlap: int =200):
         self.text_splitter = RecursiveCharacterTextSplitter(
             chunk_size=chunk_size,
@@ -11,7 +11,7 @@ class PDFProcessor:
             length_function=len
         )
         confidential_keywords = getattr(Config, "CONFIGENTIAL_KEYWORDS", [])
-        self.sanitizer = DataSanitizer(custom_keywords=confidential_keywords)
+        self.sanitizer = DataSanitizerService(custom_keywords=confidential_keywords)
         
     def process_pdf(self, pdf_file) -> tuple[list[dict], str]:
         reader = PdfReader(pdf_file)

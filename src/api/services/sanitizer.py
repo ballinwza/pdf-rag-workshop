@@ -2,7 +2,7 @@ import re
 # from presidio_analyzer import AnalyzerEngine
 # from presidio_anonymizer import AnonymizerEngine
 
-class DataSanitizer:
+class DataSanitizerService:
     def __init__(self, custom_keywords: list[str] = []):
         # Presidio NER engine
         # self.analyzer = AnalyzerEngine()
