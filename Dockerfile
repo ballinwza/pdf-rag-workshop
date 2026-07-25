@@ -23,6 +23,6 @@ COPY . .
 
 RUN chmod +x entrypoint.sh
 
-EXPOSE 8000 8501
+EXPOSE 8000
 
 CMD ["./entrypoint.sh"]
