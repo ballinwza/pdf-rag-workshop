@@ -7,12 +7,13 @@
 A PDF document search, summarization, and Q&A application using Retrieval-Augmented Generation (RAG), powered by Google Gemini API, Pinecone Vector Database, and Streamlit.
 
 ## Preview
-Deployed on Render it's severless must waiting around 3min after open web site.
+Deployed on Render it's severless must waiting about 1-3mins after open web site.
 
-* (Web Demo)[https://pdf-rag-workshop.onrender.com/]
+* [Backend web demo](https://pdf-rag-workshop.onrender.com/docs) <- Must open service 1st, it's serverless
+* [Frontend web demo](https://rag-chatbot-pdf.lovable.app)
 
 ## 🌟 Key Features
-* 📄 PDF Processing & Chunking: Parses PDF files and chunks content into smaller segments, automatically capturing page number metadata.
+* 📄 PDF Processing & Chunking: Parses PDF files and chunks content into smaller segments, automatically capturing page number metadata, redacted system for secure information example PDPA.
 
 * 🧠 Vector Embeddings: Converts text into 768-dimensional vector embeddings using Gemini's gemini-embedding-001 model.
 
@@ -25,8 +26,9 @@ Deployed on Render it's severless must waiting around 3min after open web site.
 ## 🛠️ Technology
 | Systems  | Dependencies | Jobs  | 
 |---|---|---|
-| UI  | Streamlit  | UI interface  |
+| UI  | Streamlit (for test) & frontend web service  | UI interface  |
 | PDF Extraction  | PyPDF + Langchain Text Splitter  | Convert PDF to text chunk  |
+| Redaction  | Sanitizer service  | Redacted secure information  |
 | Embedding Mode  | gemini-embedding-001  | Vector with 768 dimensions  |
 | Vector Database | Pinecone Serverless Index | Vector data storing and similary search
 | LLM Model | gemini-3.5-flash-lite | Analystor question and answer
@@ -35,20 +37,19 @@ Deployed on Render it's severless must waiting around 3min after open web site.
 ```
 pdf-rag-workshop/
 │
-├── src/                  # All service
+├── src/                  # Main api service
 │   ├── config.py         # Configuration & Environment Variables
-│   ├── sanitizer.py      # Redactor
-│   ├── pdf_loader.py     # PDF chunker
-│   ├── vector_store.py   # Pinecone (Create Index, Upsert, Query) vector store
-│   └── rag_engine.py     # Gemini API (Embeddings, RAG, Summary)
-│
+│   ├── models            # Request & response model
+│   ├── repositories      # Connector outside environemnt
+│   ├── services          # Logic
+│   ├── routers           # Api route
+├── main.py               # API configuration
 └── app.py                # Streamlit UI
 ```
 
-## 🚀 Setup & Usage (on local)
-
+## 🚀 Setup & Usage (Local)
 1. Install Makefile 
-[Docs](https://makefiletutorial.com/) 
+[Docs](https://makefiletutorial.com/) ,
 [Download windows](https://gnuwin32.sourceforge.net/packages/make.htm)
 
 2. Open Virtual Environment
@@ -61,8 +62,10 @@ Windows (PowerShell): .\venv\Scripts\Activate.ps1
 
 5. Web browser will open ```http://localhost:8501``` automaticly
 
-## 🔄 Apllication Workflow
+## 🚀 Usage (Docker)
+1. ```docker-compose up```
 
+## 🔄 Apllication Workflow (Streamlit)
 1. Upload PDF documents on Sidebar
 
 2. Asking question about PDF directly on __Tab2__
