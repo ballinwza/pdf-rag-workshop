@@ -14,4 +14,4 @@ class Config:
     EMBEDDING_MODEL = "gemini-embedding-001"
     LLM_MODEL = "gemini-3.5-flash-lite"
     
-    CONFIGENTIAL_KEYWORDS=["ไอเหี้ย"]
+    CONFIGENTIAL_KEYWORDS=["ไอเหี้ย", "อนันต์ อัศวโภคิน"]

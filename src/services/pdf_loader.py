@@ -1,6 +1,6 @@
 from pypdf import PdfReader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
-from src.api.services.sanitizer import DataSanitizerService
+from src.services.sanitizer import DataSanitizerService
 from src.config import Config
 
 class PDFProcessorService:

@@ -1,5 +1,5 @@
 import pytest
-from src.api.services.sanitizer import DataSanitizerService
+from src.services.sanitizer import DataSanitizerService
 
 def test_regex_redaction():
     sanitizer = DataSanitizerService()

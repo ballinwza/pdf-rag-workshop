@@ -1,8 +1,8 @@
 import streamlit as st
 from src.config import Config
-from src.api.services.pdf_loader import PDFProcessorService
+from src.services.pdf_loader import PDFProcessorService
 from src.repositories.pinecone_store import PineconeManagerService
-from src.api.services.gemini_rag_engine import GeminiRAGEngineService
+from src.repositories.gemini_rag_engine import GeminiRAGEngineService
 
 MAX_FILE_SIZE_MB = 10
 MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024
@@ -20,8 +20,7 @@ def init_services():
     vector_store = PineconeManagerService(
         api_key=Config.PINECONE_API_KEY,
         index_name=Config.PINECONE_INDEX_NAME,
-        dimension=Config.PINECONE_DIMENSION,
-        namespace=Config.PINECONE_NAMESPACE
+        dimension=Config.PINECONE_DIMENSION
     )
     pdf_processor = PDFProcessorService()
     return rag_engine, vector_store, pdf_processor

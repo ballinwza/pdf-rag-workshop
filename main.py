@@ -4,7 +4,7 @@ load_dotenv()
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from src.api.routers.rag_router import router as rag_router
+from src.routers.rag_router import router as rag_router
 
 app = FastAPI(
     title="RAG PDF apllication",

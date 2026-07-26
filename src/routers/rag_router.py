@@ -1,6 +1,6 @@
 from fastapi import APIRouter, UploadFile, File, HTTPException, status
-from src.api.models.rag_model import DeleteVectorDBRequest, DeleteVectorDBResponse,RAGQuestionRequest, RAGQuestionResponse, HealthResponse, DeleteVectorDBSourceResponse, DeleteVectorDBSourceRequest
-from src.api.services.rag_service import RAGService
+from src.models.rag_model import DeleteVectorDBRequest, DeleteVectorDBResponse,RAGQuestionRequest, RAGQuestionResponse, HealthResponse, DeleteVectorDBSourceResponse, DeleteVectorDBSourceRequest
+from src.services.rag_service import RAGService
 
 router = APIRouter(prefix="/api/v1/rag", tags=["RAG"])
 rag_services = RAGService()
