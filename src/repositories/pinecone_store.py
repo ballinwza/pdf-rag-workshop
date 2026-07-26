@@ -4,14 +4,13 @@ import logging
 
 logger = logging.getLogger(__name__)
 class PineconeManagerService:
-    def __init__(self, api_key: str, index_name: str, dimension: int =768, namespace: str="__default__"):
+    def __init__(self, api_key: str, index_name: str, dimension: int =768):
         self.pc = Pinecone(api_key=api_key)
         self.index_name = index_name
         self.dimension = dimension #ต้องเป็น 768
         self._ensure_index_exists()
         self.index=self.pc.Index(self.index_name)
-        self.namespace=namespace
-    
+
     # สร้าง auto index ถ้ายังไม่มีใน Pinecone     
     def _ensure_index_exists(self):
         existing_indexes = [i.name for i in self.pc.list_indexes()]
@@ -29,7 +28,7 @@ class PineconeManagerService:
 
     
     # นำ Vector และ Metadata ขึ้น Pinecone
-    def upsert_vectors(self, chunks: list[dict], embeddings: list[list[float]]):
+    def upsert_vectors(self, chunks: list[dict], embeddings: list[list[float]], namespace: str="__default__"):
         vectors_to_upsert = []
         for i, (chunk, idx_embed) in enumerate(zip(chunks, embeddings)):
             vector_id = str(uuid.uuid4())
@@ -45,16 +44,16 @@ class PineconeManagerService:
         
         self.index.upsert(
             vectors=vectors_to_upsert,
-            namespace=self.namespace
+            namespace=namespace
         )
     
     # ค้นหา Chunk เนื้อหาใกล้เคียงที่สุด
-    def query_similar_chunks(self, query_embedding: list[float], top_k: int=4) -> list[dict]:
+    def query_similar_chunks(self, query_embedding: list[float],  namespace: str="__default__", top_k: int=4,) -> list[dict]:
         results = self.index.query(
             vector=query_embedding,
             top_k=top_k,
             include_metadata=True,
-            namespace=self.namespace
+            namespace=namespace
         )
         matches = []
         for match in getattr(results, "matches", []):
@@ -66,6 +65,43 @@ class PineconeManagerService:
         return matches
     
     def delete_namespace(self, namespace: str):
-        self.index.delete(delete_all=True, namespace=namespace)
+        self.index.delete(
+            delete_all=True, 
+            namespace=namespace
+        )
         logger.info(f"Successfully deleated all vectors in namespace: {namespace}")
     
+    def delete_namespace_source(self, namespace:str, source: str):
+        self.index.delete(
+            namespace=namespace,
+            filter= {
+                "source":{"$eq": source}
+            }
+        )
+        logger.info(f"Successfully deleated all vectors in namespace: {namespace}")
+                
+    def get_all_namespaces(self) -> list[str]:
+        index = self.pc.Index(self.index_name)
+        stats = index.describe_index_stats()
+        return list(stats.get("namespaces", {}).keys())
+    
+    def get_uploaded_namespace_pdfs(self, namespace: str)-> set[str]:
+        if not namespace:
+            return set()
+        index = self.pc.Index(self.index_name)
+        dummy_vector = [0.1] * self.dimension
+        results = index.query(
+            vector=dummy_vector,
+            top_k=3,
+            include_metadata=True,
+            namespace=namespace
+        )
+        
+        seen = set()
+
+        for item in getattr(results, "matches", []):
+            source = item["metadata"]["source"]
+            if source not in seen:
+                seen.add(source)
+                
+        return seen

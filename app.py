@@ -1,7 +1,7 @@
 import streamlit as st
 from src.config import Config
 from src.api.services.pdf_loader import PDFProcessorService
-from src.api.services.pinecone_store import PineconeManagerService
+from src.repositories.pinecone_store import PineconeManagerService
 from src.api.services.gemini_rag_engine import GeminiRAGEngineService
 
 MAX_FILE_SIZE_MB = 10

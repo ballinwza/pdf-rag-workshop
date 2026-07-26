@@ -14,7 +14,7 @@ class PDFProcessorService:
         self.sanitizer = DataSanitizerService(custom_keywords=confidential_keywords)
         
     def process_pdf(self, pdf_file) -> tuple[list[dict], str]:
-        reader = PdfReader(pdf_file)
+        reader = PdfReader(pdf_file.file)
         chunks_data = []
         full_text_pages = []
 
@@ -34,7 +34,7 @@ class PDFProcessorService:
                     "text": chunk,
                     "metadata": {
                         "page": page_num,
-                        "source": pdf_file.name
+                        "source": getattr(pdf_file, "filename", "unknown.pdf")
                     }
                 })
         return chunks_data, "\n".join(full_text_pages)
