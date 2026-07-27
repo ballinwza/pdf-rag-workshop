@@ -3,8 +3,10 @@ from src.services.pdf_loader import PDFProcessorService
 from src.repositories.gemini_rag_engine import GeminiRAGEngineService
 from src.repositories.pinecone_store import PineconeManagerService
 from src.config import Config
+from src.services.Image_loader import ImageLoader
 from fastapi import File,UploadFile
 from concurrent.futures import ThreadPoolExecutor, as_completed
+
     
 class RAGService:
     def __init__(self):
@@ -26,6 +28,7 @@ class RAGService:
             index_name=Config.PINECONE_INDEX_NAME,
             dimension=Config.PINECONE_DIMENSION,
         )
+        self.image_loader = ImageLoader()
         
     def uploadPDF(self, namespace: str, file: UploadFile = File(...)):
         if file.filename is None:
@@ -40,16 +43,47 @@ class RAGService:
         except Exception as e:
             raise RuntimeError(f"Failed uploadPDF: {str(e)}")
         
-    def askQuestion(self, question: str, namespace: str, top_k:int =4)->str:
-        ask_prompt = "ถามคำถามเกี่ยวกับ PDF นี้... "+question
+    def uploadImage(self, namespace: str, file: UploadFile = File(...)):
+        if file.content_type is not None and not file.content_type.startswith("image/"):
+            raise TypeError("Invalid iamge type")
+        
+        if file.filename is None:
+            raise ValueError(f"Not found filename")
+                    
+        allowed_extensions = (".png", ".jpg", ".jpeg", ".webp")
+        if not file.filename.lower().endswith(allowed_extensions):
+            raise ValueError("Available for images (.png, .jpg, .jpeg, .webp) only")
+    
+        
         try:
-            query_vector = self.rag_engine.get_single_embedding(ask_prompt)
-            matching_chunks = self.vector_db.query_similar_chunks(query_vector,namespace, top_k)
-            answer = self.rag_engine.answer_question(ask_prompt, matching_chunks)
-            return answer
+            chunks, extracted_text = self.image_loader.process_image(file)
+            
+            text_to_embed = [c["text"] for c in chunks]
+            embedded = self.rag_engine.get_embeddings(text_to_embed)
+            
+            self.vector_db.upsert_vectors(chunks, embedded, namespace)
+            return {
+                "status":"success",
+                "message": "Vector index was uploaded",
+                "filename": file.filename,
+                "extracted_text": extracted_text
+            }
         except Exception as e:
             raise RuntimeError(f"Failed askQuestion: {str(e)}")
         
+    def askQuestion(self, question: str, namespace: str, top_k:int =4)->str:
+        try:
+            query_vector = self.rag_engine.get_single_embedding(question)
+            matching_chunks, fileType = self.vector_db.query_similar_chunks(query_vector,namespace, top_k)
+            
+            if fileType == "image":
+                answer = self.rag_engine.answer_question_image(question, matching_chunks)
+            else:
+                answer = self.rag_engine.answer_question_pdf(question, matching_chunks)
+            return answer
+        except Exception as e:
+            raise RuntimeError(f"Failed askQuestion: {str(e)}")
+            
     def deleteVectorStoreNamespace(self, namespace: str):
         try:
             self.vector_db.delete_namespace(namespace)

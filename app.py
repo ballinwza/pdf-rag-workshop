@@ -83,10 +83,10 @@ with tab1:
                 query_vector = rag_engine.get_single_embedding(prompt)
                 
                 # 2. Query Pinecone
-                matching_chunks = vector_store.query_similar_chunks(query_vector, top_k=4)
+                matching_chunks, _ = vector_store.query_similar_chunks(query_vector, top_k=4)
                 
                 # 3. Generate Answer from Gemini
-                answer = rag_engine.answer_question(prompt, matching_chunks)
+                answer = rag_engine.answer_question_pdf(prompt, matching_chunks)
                 st.markdown(answer)
                 
 

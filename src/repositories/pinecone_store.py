@@ -32,23 +32,30 @@ class PineconeManagerService:
         vectors_to_upsert = []
         for i, (chunk, idx_embed) in enumerate(zip(chunks, embeddings)):
             vector_id = str(uuid.uuid4())
+            chunk_meta = chunk.get("metadata", {})
+            
+            metadata = {
+                "text": chunk["text"],
+                "source": chunk_meta.get("source", "unknow"),
+                "file_type": chunk_meta.get("file_type", "image")
+            }
+            
+            if "page" in chunk_meta:
+                metadata["page"] = chunk_meta["page"]
+                
             vectors_to_upsert.append({
                 "id": vector_id,
                 "values": idx_embed,
-                "metadata": {
-                    "text": chunk["text"],
-                    "page": chunk["metadata"]["page"],
-                    "source": chunk["metadata"]["source"]
-                }
+                "metadata": metadata
             })
         
         self.index.upsert(
             vectors=vectors_to_upsert,
             namespace=namespace
         )
-    
+        
     # ค้นหา Chunk เนื้อหาใกล้เคียงที่สุด
-    def query_similar_chunks(self, query_embedding: list[float],  namespace: str="__default__", top_k: int=4,) -> list[dict]:
+    def query_similar_chunks(self, query_embedding: list[float],  namespace: str="__default__", top_k: int=4) -> tuple[list[dict], str]:
         results = self.index.query(
             vector=query_embedding,
             top_k=top_k,
@@ -57,13 +64,38 @@ class PineconeManagerService:
         )
         matches = []
         for match in getattr(results, "matches", []):
-            matches.append({
+            fileType =  match.metadata["file_type"]
+            
+            chunk = {
                 "text":match.metadata["text"],
-                "page":int(match.metadata["page"]),
-                "score":match.score
-            })
-        return matches
+                "score":match.score,
+                "file_type": fileType
+            }
+            
+            if fileType == "pdf":
+                chunk["page"] = int(match.metadata["page"])
+            
+            matches.append(chunk)
+        return matches, fileType
     
+    def query_text(self, query_embedding: list[float],  namespace: str="__default__", top_k: int=4) -> str:
+        results = self.index.query(
+            vector=query_embedding,
+            top_k=top_k,
+            include_metadata=True,
+            namespace=namespace
+        )
+        res_dict = getattr(results, "matches")
+    
+        contexts = [
+            match["metadata"]["text"] 
+            for match in res_dict.get("matches", []) 
+            if "metadata" in match and "text" in match["metadata"]
+        ]
+        
+        combined_context = "\n---\n".join(contexts)
+        return combined_context
+        
     def delete_namespace(self, namespace: str):
         self.index.delete(
             delete_all=True, 
@@ -105,3 +137,4 @@ class PineconeManagerService:
                 seen.add(source)
                 
         return seen
+    

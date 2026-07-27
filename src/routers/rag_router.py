@@ -1,5 +1,5 @@
 from fastapi import APIRouter, UploadFile, File, HTTPException, status
-from src.models.rag_model import DeleteVectorDBRequest, DeleteVectorDBResponse,RAGQuestionRequest, RAGQuestionResponse, HealthResponse, DeleteVectorDBSourceResponse, DeleteVectorDBSourceRequest
+from src.models.rag_model import UploadImageResponse, DeleteVectorDBRequest, DeleteVectorDBResponse,RAGQuestionRequest, RAGQuestionResponse, HealthResponse, DeleteVectorDBSourceResponse, DeleteVectorDBSourceRequest
 from src.services.rag_service import RAGService
 
 router = APIRouter(prefix="/api/v1/rag", tags=["RAG"])
@@ -43,7 +43,27 @@ async def upload_pdf(namespace:str, file: UploadFile = File(...)):
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
-        
+
+@router.post(
+    "/upload-image",
+    status_code=status.HTTP_201_CREATED,
+    response_model=UploadImageResponse
+)
+async def upload_image(
+    namespace: str, 
+    file: UploadFile = File(...)):
+    try:
+        response = rag_services.uploadImage(namespace=namespace, file=file)
+        return UploadImageResponse(
+            status=response["status"],
+            message=response["message"],
+            filename=response["filename"],
+            text=response["extracted_text"]
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 @router.post("/question", response_model=RAGQuestionResponse)
 async def rag_question(request: RAGQuestionRequest):
     try:

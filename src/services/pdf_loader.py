@@ -34,6 +34,7 @@ class PDFProcessorService:
                     "text": chunk,
                     "metadata": {
                         "page": page_num,
+                        "file_type": "pdf",
                         "source": getattr(pdf_file, "filename", "unknown.pdf")
                     }
                 })

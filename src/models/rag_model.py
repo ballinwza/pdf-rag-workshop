@@ -1,5 +1,11 @@
 from pydantic import BaseModel, Field
 
+class UploadImageResponse(BaseModel):
+    status: str
+    message: str
+    filename: str
+    text: str
+    
 class RAGQuestionRequest(BaseModel):
     question: str = Field(default="สรุปบทความ")
     top_k: int = Field(default=3, ge=1, le=10, description="ค่าความใกล้เคียงของคำถามต่อคำตอบ") 
@@ -11,7 +17,8 @@ class RAGQuestionResponse(BaseModel):
 class HealthResponse(BaseModel):
     status: str
     pinecone_connected: bool
-    
+
+# Delete    
 class DeleteVectorDBRequest(BaseModel):
     namespace: str = Field(examples=["pdf_docs_stock"], description="ชื่อ Namespace ที่ต้องการลบใน vector DB")
     

@@ -56,23 +56,47 @@ class GeminiRAGEngineService:
 
         return response.text or "ไม่สามารถสร้างข้อความสรุปได้"
     
+    def answer_question_image(self, query:str, context:list[dict]):
+        prompt = f"""
+        คุณเป็นผู้ช่วยตอบคำถามจากเอกสารภาพ
+        โปรดตอบคำถามโดยอ้างอิงจากข้อมูลบริบท (Context) ที่กำหนดให้เท่านั้น หากในบริบทไม่มีคำตอบ ให้ตอบว่า "ไม่พบข้อมูลในเอกสาร"
+
+        [Context ที่พบจากเอกสาร]:
+        {context}
+
+        [คำถาม]: {query}
+        """
+        response = self.client.models.generate_content(
+                    model=self.llm_model,
+                    contents=prompt
+                )
+        return response.text or "ไม่สามารถสร้างคำตอบได้"
+    
     # ตอบคำถามอิงตาม Context จาก Pinecone
-    def answer_question(self, query:str, context_chunks: list[dict]) -> str:
+    def answer_question_pdf(self, query:str, context_chunks: list[dict]) -> str:
         context_str = "\n\n".join([f"[หน้าที่ {c['page']}]: {c['text']}"  for c in context_chunks ])
         prompt = f"""
         คุณเป็นผู้ช่วยตอบคำถามอิงจากเอกสารที่กำหนดให้เท่านั้น กรุณาตอบคำถามโดยใช้ข้อมูลจาก Context ด้านล่างนี้ หากไม่มีข้อมูลใน Context ให้ระบุว่า "ไม่พบข้อมูลดังกล่าวในเอกสาร" อย่างสุภาพ
 
-Context:
-{context_str}
+        Context:
+        {context_str}
 
-คำถาม: {query}
-คำตอบ (โปรดอ้างอิงเลขหน้าหากเป็นไปได้):
-"""
+        คำถาม: {query}
+        คำตอบ (โปรดอ้างอิงเลขหน้าหากเป็นไปได้):
+        """
 
         response = self.client.models.generate_content(
             model=self.llm_model,
             contents=prompt
         )
         return response.text or "ไม่สามารถสร้างคำตอบได้"
+    
+    def generate_content_image(self, img, prompt: str)->str|None:
+        response = self.client.models.generate_content(
+            model=self.llm_model,
+            contents=[img, prompt]
+        )
+        return response.text
+        
     
     
